@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace TextSearchLib.Core
@@ -6,6 +7,8 @@ namespace TextSearchLib.Core
     public class RecursiveDirectoryWatcher : IDisposable
     {
         private readonly FileSystemWatcher _watcher;
+        private readonly HashSet<string> _detectedFiles = new HashSet<string>();
+        
         private bool _disposed;
 
         public event EventHandler<string> FileDetected;
@@ -31,20 +34,21 @@ namespace TextSearchLib.Core
             _watcher.Deleted += OnDeleted;
             _watcher.Renamed += OnRenamed;
             
-            DetectFiles(absoluteDirectoryPath);
+            ProcessDirectoryDetection(absoluteDirectoryPath);
         }
 
-        void DetectFiles(string directoryPath)
+        void ProcessDirectoryDetection(string directoryPath)
         {
             foreach (var filePath in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
             {
-                OnFileDetected(filePath);
+                ProcessSingleFileDetection(filePath);
             }
         }
 
-        private void OnFileDetected(string absoluteFilePath)
-        { 
-            FileDetected?.Invoke(this, absoluteFilePath);
+        private void ProcessSingleFileDetection(string absoluteFilePath)
+        {
+            if (_detectedFiles.Add(absoluteFilePath))
+                FileDetected?.Invoke(this, absoluteFilePath);
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
@@ -56,24 +60,52 @@ namespace TextSearchLib.Core
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
             if (Directory.Exists(e.FullPath)) 
-                DetectFiles(e.FullPath);
+                ProcessDirectoryDetection(e.FullPath);
             else if (File.Exists(e.FullPath))
-                FileDetected?.Invoke(this, e.FullPath);
+                ProcessSingleFileDetection(e.FullPath);
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
-            // File or directory deletion is detected, but we can't tell which from FileSystemEventArgs alone.
-            FileGone?.Invoke(this, e.FullPath); // You may choose to rename this to ItemDeleted and treat generically
+            var fileRemoved = ProcessSingleFileDeletion(e.FullPath);
+            if (!fileRemoved)
+                ProcessDirectoryDeletion(e.FullPath);
+        }
+        
+        private bool ProcessSingleFileDeletion(string absoluteFilePath)
+        {
+            if (_detectedFiles.Remove(absoluteFilePath))
+            {
+                FileGone?.Invoke(this, absoluteFilePath);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ProcessDirectoryDeletion(string absoluteDirectoryPath)
+        {
+            foreach (var filePath in _detectedFiles)
+            {
+                if (filePath.StartsWith(absoluteDirectoryPath))
+                {
+                    ProcessSingleFileDeletion(filePath);
+                }
+            }
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
-            throw new NotImplementedException();
             if (Directory.Exists(e.FullPath))
-                DirectoryRenamed?.Invoke(this, (e.OldFullPath, e.FullPath));
+            {
+                ProcessDirectoryDeletion(e.OldFullPath);
+                ProcessDirectoryDetection(e.FullPath);
+            } 
             else if (File.Exists(e.FullPath))
-                FileRenamed?.Invoke(this, (e.OldFullPath, e.FullPath));
+            {
+                ProcessSingleFileDeletion(e.OldFullPath);
+                ProcessDirectoryDetection(e.FullPath);
+            }
         }
 
         public void Dispose()
