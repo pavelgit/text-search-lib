@@ -49,6 +49,39 @@ namespace TextSearchLib.Core
                 _lock.ExitWriteLock();
             }
         }
+        
+        public bool RemoveFileFromIndex(string absoluteFilePath)
+        {
+            _lock.EnterWriteLock();
+            try
+            {
+                foreach (var wordEntry in _index)
+                {
+                    wordEntry.Value.Remove(absoluteFilePath);
+                }
+
+                CleanupWordsWithNoFiles();
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
+            }
+            
+            return fileWasRemoved;
+        }
+
+        private void CleanupWordsWithNoFiles()
+        {
+            var emptyWords = 
+                _index.Where(entry => entry.Value.Count == 0)
+                    .Select(entry => entry.Key)
+                    .ToList();
+
+            foreach (var word in emptyWords)
+            {
+                _index.TryRemove(word, out _);
+            }
+        }
 
         public IEnumerable<string> FindFilesContainingWord(string word)
         {
