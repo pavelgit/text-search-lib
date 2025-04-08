@@ -7,9 +7,8 @@ namespace TextSearchLib.Core
 {
     public class TextFinder
     {
-
         private readonly FileIndexer _fileIndexer;
-        private SingleFileWatcher _singleFileWatcher;
+        private CombinedFileSystemWatcher _fileSystemWatcher = new CombinedFileSystemWatcher();
         
         public TextFinder(Func<string, IEnumerable<string>> wordSplitter)
         {
@@ -18,8 +17,10 @@ namespace TextSearchLib.Core
 
         public void AddFile(string filePath)
         {
-            _singleFileWatcher = new SingleFileWatcher(filePath);
-            _singleFileWatcher.FileChanged += (sender, s) =>
+            _fileIndexer.AddTextToIndex(File.ReadAllText(filePath), filePath);
+            _fileSystemWatcher.AddFile(filePath);
+            
+            _fileSystemWatcher.FileChanged += (sender, s) =>
             {
                 _fileIndexer.AddTextToIndex(File.ReadAllText(filePath), filePath);
             };

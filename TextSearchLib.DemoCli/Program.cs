@@ -8,9 +8,8 @@ Console.WriteLine();
 // Create a text searcher instance
 var textFinder = new TextFinder(text => Regex.Split(text, @"\W+"));
 
-var path = "/Users/checkito120/private/net-experiments/text-search-lib/file.txt";
-
-textFinder.AddFile(path);
+textFinder.AddFile("/Users/checkito120/private/net-experiments/files/cats.txt");
+textFinder.AddFile("/Users/checkito120/private/net-experiments/files/dogs.txt");
 
 Console.WriteLine("Enter words to search (press Ctrl+C to exit):");
 
