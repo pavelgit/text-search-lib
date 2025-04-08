@@ -17,12 +17,26 @@ namespace TextSearchLib.Core
 
         public void AddFile(string filePath)
         {
-            _fileIndexer.AddTextToIndex(File.ReadAllText(filePath), filePath);
-            _fileSystemWatcher.AddFile(filePath);
+            var absolutePath = Path.GetFullPath(filePath);
             
-            _fileSystemWatcher.FileChanged += (sender, s) =>
+            _fileIndexer.AddTextToIndex(File.ReadAllText(absolutePath), absolutePath);
+            _fileSystemWatcher.AddFile(absolutePath);
+            
+            _fileSystemWatcher.FileChanged += (sender, changedFileAbsolutePath) =>
             {
-                _fileIndexer.AddTextToIndex(File.ReadAllText(filePath), filePath);
+                _fileIndexer.AddTextToIndex(File.ReadAllText(changedFileAbsolutePath), changedFileAbsolutePath);
+            };
+        }
+
+        public void AddDirectory(string directoryPath)
+        {
+            var absolutePath = Path.GetFullPath(directoryPath);
+            
+            _fileSystemWatcher.AddDirectory(absolutePath);
+            
+            _fileSystemWatcher.FileChanged += (sender, changedFileAbsolutePath) =>
+            {
+                _fileIndexer.AddTextToIndex(File.ReadAllText(changedFileAbsolutePath), changedFileAbsolutePath);
             };
         }
         

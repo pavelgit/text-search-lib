@@ -9,21 +9,32 @@ namespace TextSearchLib.Core
         private bool _disposed;
         public event EventHandler<string> FileChanged;
         
-        public RecursiveDirectoryWatcher(string absolutePath)
+        public RecursiveDirectoryWatcher(string absoluteDirectoryPath)
         {
-            _watcher = new FileSystemWatcher(absolutePath)
+            if (string.IsNullOrEmpty(absoluteDirectoryPath))
+                throw new ArgumentNullException(nameof(absoluteDirectoryPath));
+                
+            if (!Directory.Exists(absoluteDirectoryPath))
+                throw new DirectoryNotFoundException($"Directory not found: {absoluteDirectoryPath}");
+            
+            _watcher = new FileSystemWatcher(absoluteDirectoryPath)
             {
                 NotifyFilter = NotifyFilters.LastWrite,
-                Filter = Path.GetFileName(absolutePath),
+                IncludeSubdirectories = true,
                 EnableRaisingEvents = true
             };
             
-            _watcher.Changed += OnFileChanged;
+            _watcher.Changed += OnFileEvent;
+            _watcher.Created += OnFileEvent;
         }
         
-        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        private void OnFileEvent(object sender, FileSystemEventArgs e)
         {
-            FileChanged?.Invoke(this, e.FullPath);
+            // Only notify for files, not directories
+            if (File.Exists(e.FullPath))
+            {
+                FileChanged?.Invoke(this, e.FullPath);
+            }
         }
         
         public void Dispose()
@@ -31,8 +42,13 @@ namespace TextSearchLib.Core
             if (_disposed)
                 return;
                 
-            _watcher.Changed -= OnFileChanged;
-            _watcher.Dispose();
+            if (_watcher != null)
+            {
+                _watcher.Changed -= OnFileEvent;
+                _watcher.Created -= OnFileEvent;
+                _watcher.Dispose();
+            }
+            
             _disposed = true;
         }
     }

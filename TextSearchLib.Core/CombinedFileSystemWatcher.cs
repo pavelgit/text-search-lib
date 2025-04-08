@@ -7,27 +7,31 @@ namespace TextSearchLib.Core
     public class CombinedFileSystemWatcher : IDisposable
     {
         private readonly Dictionary<string, SingleFileWatcher> _fileWatchers = new Dictionary<string, SingleFileWatcher>();
+        private readonly Dictionary<string, RecursiveDirectoryWatcher> _directoryWatchers = new Dictionary<string, RecursiveDirectoryWatcher>();
         private bool _disposed;
         
         public event EventHandler<string> FileChanged;
         
-        public void AddFile(string filePath)
+        public void AddFile(string absoluteFilePath)
         {
-            if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentNullException(nameof(filePath));
-                
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException("File not found", filePath);
-                
-            var absolutePath = Path.GetFullPath(filePath);
-            
             // Don't add duplicate watchers
-            if (_fileWatchers.ContainsKey(absolutePath))
+            if (_fileWatchers.ContainsKey(absoluteFilePath))
                 return;
                 
-            var watcher = new SingleFileWatcher(absolutePath);
+            var watcher = new SingleFileWatcher(absoluteFilePath);
             watcher.FileChanged += OnFileChanged;
-            _fileWatchers.Add(absolutePath, watcher);
+            _fileWatchers.Add(absoluteFilePath, watcher);
+        }
+        
+        public void AddDirectory(string absoluteDirectoryPath)
+        {
+            // Don't add duplicate watchers
+            if (_directoryWatchers.ContainsKey(absoluteDirectoryPath))
+                return;
+
+            var watcher = new RecursiveDirectoryWatcher(absoluteDirectoryPath);
+            watcher.FileChanged += OnFileChanged;
+            _directoryWatchers.Add(absoluteDirectoryPath, watcher);
         }
         
         private void OnFileChanged(object sender, string filePath)
@@ -41,6 +45,12 @@ namespace TextSearchLib.Core
                 return;
                 
             foreach (var watcher in _fileWatchers.Values)
+            {
+                watcher.FileChanged -= OnFileChanged;
+                watcher.Dispose();
+            }  
+            
+            foreach (var watcher in _directoryWatchers.Values)
             {
                 watcher.FileChanged -= OnFileChanged;
                 watcher.Dispose();

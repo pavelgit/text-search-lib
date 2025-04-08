@@ -9,12 +9,18 @@ namespace TextSearchLib.Core
         private bool _disposed;
         public event EventHandler<string> FileChanged;
         
-        public SingleFileWatcher(string absolutePath)
+        public SingleFileWatcher(string absoluteFilePath)
         {
-            _watcher = new FileSystemWatcher(Path.GetDirectoryName(absolutePath))
+            if (string.IsNullOrEmpty(absoluteFilePath))
+                throw new ArgumentNullException(nameof(absoluteFilePath));
+
+            if (!File.Exists(absoluteFilePath))
+                throw new DirectoryNotFoundException($"Directory not found: {absoluteFilePath}");
+            
+            _watcher = new FileSystemWatcher(Path.GetDirectoryName(absoluteFilePath))
             {
                 NotifyFilter = NotifyFilters.LastWrite,
-                Filter = Path.GetFileName(absolutePath),
+                Filter = Path.GetFileName(absoluteFilePath),
                 EnableRaisingEvents = true
             };
             
