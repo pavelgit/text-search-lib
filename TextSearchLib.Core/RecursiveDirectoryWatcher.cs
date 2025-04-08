@@ -3,15 +3,15 @@ using System.IO;
 
 namespace TextSearchLib.Core
 {
-    public class SingleFileWatcher : IDisposable
+    public class RecursiveDirectoryWatcher : IDisposable
     {
         private readonly FileSystemWatcher _watcher;
         private bool _disposed;
         public event EventHandler<string> FileChanged;
         
-        public SingleFileWatcher(string absolutePath)
+        public RecursiveDirectoryWatcher(string absolutePath)
         {
-            _watcher = new FileSystemWatcher(Path.GetDirectoryName(absolutePath))
+            _watcher = new FileSystemWatcher(absolutePath)
             {
                 NotifyFilter = NotifyFilters.LastWrite,
                 Filter = Path.GetFileName(absolutePath),
