@@ -1,0 +1,179 @@
+track MY TIME
+	06.04 19:00 created repo
+	08.04 08:15
+
+----------------------------------------------------------------
+
+usage
+	TextFinder textFinder = new TextFinder(TextSplittingType.SimpleTextSplitting);
+	textFinder.AddFile(...)
+	textFinder.AddDirectory(...)
+
+	textFinder.FindFilesContainingWord("hello")
+
+
+classes
+	TextFinder
+	+	AddFile
+	+	AddDirectory
+	-	RemoveFile
+	-	RemoveDirectory
+
+	+	FindFilesContainingWord
+
+	+	private FileSystemWatcher , fires events
+
+	+	listens to FileSystemWatcher events
+
+	+	private FileIndexer 
+
+	-	events: onFileIndexed
+	-	GetFileIndexInfo(file): last indexed date time
+
+
+	FileSystemWatcher
+	+	AddFile
+	+	AddDirectory
+	-	RemoveFile
+	-	RemoveDiretory
+
+	+	event to tell "file changed!"
+	+	event to tell "file added to indexed directory"
+	-	event to tell "file remove from indexed directory"
+
+	-	debounce
+	-	error handling
+
+
+	FileIndexer
+	+	list of indexed files 
+	+	IndexFile
+	-	RemoveFileFromIndex
+	-	isIndexing
+	-	lastIndexUpdatedOn
+	+	FindFilesContainingWord
+
+
+
+
+
+-----------------------------------------------------------------
+GENERAL
+
++	track MY TIME
++	Document any ASSUMPTIONS you make.
+
++	should create a git repo
+
++	create functioning code
+
++	deduplicate indexed files (if added twice or added as a file and as a part of directory)
+
++	possible file/dir events
+		what to do about index file renames?
+		what to do if indexed dir renamed?
+		react on file deletion and directory deletion
+
+		if a file is added as a single file
+			when the file is changed - it is reindexed
+			when the file is removed - it is removed from the index (no error)
+			when the file is renamed - it is removed from the index (no error)
+			when the file is moved anywhere - it is removed from the index (no error)
+
+		if a directory added
+			when any file in the directory (or nested) added - it is indexed
+			when any file in the directory (or nested) is changed - it is reindexed
+			when any file in the directory (or nested) removed - itis removed from the index
+			when any file in the directory (or nested) moved/renamed - it is removed from the index
+				so essentially if it is renamed - then it is removed from the index and adde as a different file - can be optimized to save mem/cpu!
+				same if a file is moved within the directory
+
+	I will simplify the directory renaming and file renaming a lot
+	SingleFileWatcher doesn't catch file renames or deletions - I might simply reuse the DirectoryWatcher for that with proper filtering 
+	File contents are read into memory with ReadAll
+	there are still placees where method args are not null-checked
+	File change event Debouncing would be good to add (would help also against the case of file rename within a watched dir - it fires 2 events: changed and detected)
+
+
+	what is finalize vs dispose? supress finelize??
+
+!!!	create different ways of splitting (lexer)
+
+	FileIndexer - enter write and read locks - a bit too large locks, maybe I want to somehow make it different
+
+---	create simple app repo 
+
+	readme
+
+	create tests
+		how to test file system events? multithreading?
+
+!!!	create interfaces, make it extensible
+
+	publish on nuget
+
+!!!	compatibility!!!
+		different .net platforms 
+			https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0 
+			+ net48 (latest .net framework, 2022)
+
+		different architectures
+		different OS
+		different file systems
+
+	look like I need cicd??
+
+	MIN REQUIREMENTS:
+	+	Allow adding directories and files to an index.
+	+	Return a list of files containing a given word.
+	+	Support multithreaded access to the index.
+	!!!	Automatically update the index when files or directories change.
+	!!!	Be designed to support different ways of splitting text into words (e.g., simple text splitting or using lexers).
+		OPTIONAL: Saving its state between the sessions is an optional requirement
+	!!!	Also, create a simple program that lets users add directories or files to the index and perform basic word search queries.
+
+
+		Your work will be evaluated on 
+			- correctness, 
+			- code quality, 
+			- system design, 
+			- VSC history, 
+			- and how you handle unclear requirements. 
+
+
+
+-------------------------------------------------------------
+
+
+
+My assumptions:
+	the library needs to have great compatibility - to different .net platform versions, cpu architectures, operating systems, file systems, maybe other things as well...
+
+	the library needs to be published as nuget
+
+	the "simple program that lets users add directories and files" - needs to be implemented as a separate project (in a separate git repo)
+
+	different ways of splitting - the library needs to be also extensible
+
+	we may have text files up to 100 MB
+
+	the search has to be fast and cheap (cpu time)
+	there can be many files (e.g. 10k)
+
+
+	I should not use any other libraries or engines that perform indexing (such as SphinxSearch)
+
+	"Be designed to support different ways of splitting text into words (e.g., simple text splitting or using lexers)."
+		it is sufficient to provide the possibility to define the type of splitting when we initialize the index only, not per every single search
+
+
+	library needs to be highly customizable 
+
+	tests are required
+
+	case sensitivity/insensitivity should be configurable
+
+	if a file is moved or renamed - we treat it as if the original file is removed
+
+
+
