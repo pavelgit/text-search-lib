@@ -33,11 +33,9 @@ namespace TextSearchLib.Core
             _watcher.Created += OnCreated;
             _watcher.Deleted += OnDeleted;
             _watcher.Renamed += OnRenamed;
-            
-            ProcessDirectoryDetection(absoluteDirectoryPath);
         }
 
-        void ProcessDirectoryDetection(string directoryPath)
+        public void ProcessDirectoryDetection(string directoryPath)
         {
             foreach (var filePath in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
             {
@@ -104,7 +102,7 @@ namespace TextSearchLib.Core
             else if (File.Exists(e.FullPath))
             {
                 ProcessSingleFileDeletion(e.OldFullPath);
-                ProcessDirectoryDetection(e.FullPath);
+                ProcessSingleFileDetection(e.FullPath);
             }
         }
 

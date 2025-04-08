@@ -50,7 +50,7 @@ namespace TextSearchLib.Core
             }
         }
         
-        public bool RemoveFileFromIndex(string absoluteFilePath)
+        public void RemoveFileFromIndex(string absoluteFilePath)
         {
             _lock.EnterWriteLock();
             try
@@ -66,8 +66,6 @@ namespace TextSearchLib.Core
             {
                 _lock.ExitWriteLock();
             }
-            
-            return fileWasRemoved;
         }
 
         private void CleanupWordsWithNoFiles()

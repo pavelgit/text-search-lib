@@ -11,6 +11,8 @@ namespace TextSearchLib.Core
         private bool _disposed;
         
         public event EventHandler<string> FileChanged;
+        public event EventHandler<string> FileDetected;
+        public event EventHandler<string> FileGone;
         
         public void AddFile(string absoluteFilePath)
         {
@@ -25,18 +27,31 @@ namespace TextSearchLib.Core
         
         public void AddDirectory(string absoluteDirectoryPath)
         {
-            // Don't add duplicate watchers
             if (_directoryWatchers.ContainsKey(absoluteDirectoryPath))
                 return;
 
             var watcher = new RecursiveDirectoryWatcher(absoluteDirectoryPath);
             watcher.FileChanged += OnFileChanged;
+            watcher.FileDetected += OnFileDetected;
+            watcher.FileGone += OnFileGone;
             _directoryWatchers.Add(absoluteDirectoryPath, watcher);
+     
+            watcher.ProcessDirectoryDetection(absoluteDirectoryPath);
         }
         
         private void OnFileChanged(object sender, string filePath)
         {
             FileChanged?.Invoke(this, filePath);
+        }
+        
+        private void OnFileDetected(object sender, string filePath)
+        {
+            FileDetected?.Invoke(this, filePath);
+        }
+        
+        private void OnFileGone(object sender, string filePath)
+        {
+            FileGone?.Invoke(this, filePath);
         }
         
         public void Dispose()
@@ -53,6 +68,8 @@ namespace TextSearchLib.Core
             foreach (var watcher in _directoryWatchers.Values)
             {
                 watcher.FileChanged -= OnFileChanged;
+                watcher.FileDetected -= OnFileChanged;
+                watcher.FileGone -= OnFileChanged;
                 watcher.Dispose();
             }
             
