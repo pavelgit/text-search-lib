@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace TextSearchLib.Core
+namespace TextSearchLib.Core.Watchers
 {
     public class SingleFileWatcher : IDisposable
     {
