@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace TextSearchLib.Core
 {
@@ -31,15 +30,26 @@ namespace TextSearchLib.Core
         public void AddDirectory(string directoryPath)
         {
             var absolutePath = Path.GetFullPath(directoryPath);
-            
+
+            IndexDirectory(absolutePath);
             _fileSystemWatcher.AddDirectory(absolutePath);
             
             _fileSystemWatcher.FileChanged += (sender, changedFileAbsolutePath) =>
             {
+                Console.WriteLine("Dir File changed: " + changedFileAbsolutePath);
                 _fileIndexer.AddTextToIndex(File.ReadAllText(changedFileAbsolutePath), changedFileAbsolutePath);
             };
         }
-        
+
+        void IndexDirectory(string directoryPath)
+        {
+            foreach (var filePath in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                string content = File.ReadAllText(filePath);
+                _fileIndexer.AddTextToIndex(content, filePath);
+            }
+        }
+
         public IEnumerable<string> FindFilesContainingWord(string word)
         {
             return _fileIndexer.FindFilesContainingWord(word);

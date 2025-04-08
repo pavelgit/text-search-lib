@@ -10,6 +10,7 @@ var textFinder = new TextFinder(text => Regex.Split(text, @"\W+"));
 
 textFinder.AddFile("/Users/checkito120/private/net-experiments/files/cats.txt");
 textFinder.AddFile("/Users/checkito120/private/net-experiments/files/dogs.txt");
+textFinder.AddDirectory("/Users/checkito120/private/net-experiments/files/nested");
 
 Console.WriteLine("Enter words to search (press Ctrl+C to exit):");
 
