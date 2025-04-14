@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn> <!-- Suppress missing XML comment warnings -->
+
+    <PackageId>TextSearchLib</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>pavelgit</Authors>
+    <Description>Library for indexing and searching text files</Description>
+    <RepositoryUrl>https://github.com/pavelgit/text-search-lib</RepositoryUrl>
+    
   </PropertyGroup>
 
 </Project>

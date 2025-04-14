@@ -16,21 +16,18 @@ namespace TextSearchLib.Core
             
             _fileSystemWatcher.FileChanged += (sender, changedFileAbsolutePath) =>
             {
-                Console.WriteLine("Dir File changed: " + changedFileAbsolutePath);
                 _fileIndexer.RemoveFileFromIndex(changedFileAbsolutePath);
                 _fileIndexer.AddTextToIndex(File.ReadAllText(changedFileAbsolutePath), changedFileAbsolutePath);
             };
             
             _fileSystemWatcher.FileDetected += (sender, changedFileAbsolutePath) =>
             {
-                Console.WriteLine("Dir File detected: " + changedFileAbsolutePath);
                 _fileIndexer.AddTextToIndex(File.ReadAllText(changedFileAbsolutePath), changedFileAbsolutePath);
             };
             
             _fileSystemWatcher.FileGone += (sender, changedFileAbsolutePath) =>
             {
-                Console.WriteLine("Dir File gone: " + changedFileAbsolutePath);
-                _fileIndexer.RemoveFileFromIndex(changedFileAbsolutePath);
+               _fileIndexer.RemoveFileFromIndex(changedFileAbsolutePath);
             };
 
         }
