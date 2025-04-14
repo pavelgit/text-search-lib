@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace TextSearchLib.Core.Watchers
 {
     public class RecursiveDirectoryWatcher : IDisposable
     {
         private readonly FileSystemWatcher _watcher;
-        private readonly HashSet<string> _detectedFiles = new HashSet<string>();
+        private readonly HashSet<string> _detectedFilePaths = new HashSet<string>();
         
         private bool _disposed;
 
@@ -39,6 +40,30 @@ namespace TextSearchLib.Core.Watchers
             _watcher.Deleted += OnDeleted;
             _watcher.Renamed += OnRenamed;
         }
+        
+        private bool AddDetectedFilePath(string absoluteFilePath)
+        {
+            lock (_detectedFilePaths)
+            {
+                return _detectedFilePaths.Add(absoluteFilePath);
+            }
+        }
+        
+        private bool RemoveDetectedFilePath(string absoluteFilePath)
+        {
+            lock (_detectedFilePaths)
+            {
+                return _detectedFilePaths.Remove(absoluteFilePath);
+            }
+        }
+        
+        private string[] GetDetectedFilePathsArray()
+        {
+            lock (_detectedFilePaths)
+            {
+                return _detectedFilePaths.ToArray();
+            }
+        }
 
         public void ProcessDirectoryDetection(string directoryPath)
         {
@@ -50,7 +75,7 @@ namespace TextSearchLib.Core.Watchers
 
         private void ProcessSingleFileDetection(string absoluteFilePath)
         {
-            if (_detectedFiles.Add(absoluteFilePath))
+            if (AddDetectedFilePath(absoluteFilePath))
             {
                 FileDetected?.Invoke(this, absoluteFilePath);
             }
@@ -78,14 +103,17 @@ namespace TextSearchLib.Core.Watchers
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
-            var fileRemoved = ProcessSingleFileDeletion(e.FullPath);
-            if (!fileRemoved)
+            var filePathWasInDetectedPaths = ProcessSingleFileDeletion(e.FullPath);
+            if (!filePathWasInDetectedPaths)
+            {
+                // If the file path was not found in the _detectedFilePaths, it might be a directory
                 ProcessDirectoryDeletion(e.FullPath);
+            }
         }
         
         private bool ProcessSingleFileDeletion(string absoluteFilePath)
         {
-            if (_detectedFiles.Remove(absoluteFilePath))
+            if (RemoveDetectedFilePath(absoluteFilePath))
             {
                 FileGone?.Invoke(this, absoluteFilePath);
                 return true;
@@ -96,7 +124,7 @@ namespace TextSearchLib.Core.Watchers
 
         private void ProcessDirectoryDeletion(string absoluteDirectoryPath)
         {
-            foreach (var filePath in _detectedFiles)
+            foreach (var filePath in GetDetectedFilePathsArray())
             {
                 if (filePath.StartsWith(absoluteDirectoryPath))
                 {

@@ -113,6 +113,8 @@ GENERAL
 
 !!!	create interfaces, make it extensible
 
+	add annotations
+
 	publish on nuget
 
 +	compatibility!!!
