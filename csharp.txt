@@ -96,26 +96,21 @@ GENERAL
 +	there are still placees where method args are not null-checked
 ???	File change event Debouncing would be good to add (would help also against the case of file rename within a watched dir - it fires 2 events: changed and detected)
 
-	what is finalize vs dispose? supress finelize??
++	hashset might not be thread safe
 
-!!!	hashset might not be thread safe
-
-	FileIndexer - enter write and read locks - a bit too large locks, maybe I want to somehow make it different
++	FileIndexer - enter write and read locks - a bit too large locks, maybe I want to somehow make it different
 
 	readme
 
 	create tests
 		how to test file system events? multithreading?
 
-	how much of interfaces do I need?
+		how much of interfaces do I need?
+			do I need to use DI??? how much of?
 
-	do I need to use DI??? how much of?
+	add annotations to methods
 
-!!!	create interfaces, make it extensible
-
-	add annotations
-
-	publish on nuget
+??	publish on nuget
 
 +	compatibility!!!
 	+	different .net platforms 
