@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using TextSearchLib.Core.Watchers;
 
-namespace TextSearchLib.Core
+namespace TextSearchLib.Core.Watchers
 {
     public class CombinedFileSystemWatcher : IDisposable
     {
@@ -17,6 +15,11 @@ namespace TextSearchLib.Core
         
         public void AddFile(string absoluteFilePath)
         {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(CombinedFileSystemWatcher));
+            }
+
             if (_fileWatchers.ContainsKey(absoluteFilePath))
             {
                 return;
@@ -29,6 +32,11 @@ namespace TextSearchLib.Core
         
         public void AddDirectory(string absoluteDirectoryPath)
         {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(CombinedFileSystemWatcher));
+            }
+
             if (_directoryWatchers.ContainsKey(absoluteDirectoryPath))
             {
                 return;
@@ -54,7 +62,7 @@ namespace TextSearchLib.Core
         }
         
         private void OnFileGone(object sender, string filePath)
-        {
+        { 
             FileGone?.Invoke(this, filePath);
         }
         
@@ -64,22 +72,21 @@ namespace TextSearchLib.Core
             {
                 return;
             }
-
+            
             foreach (var watcher in _fileWatchers.Values)
             {
                 watcher.FileChanged -= OnFileChanged;
                 watcher.Dispose();
-            }  
+            }
             
             foreach (var watcher in _directoryWatchers.Values)
             {
                 watcher.FileChanged -= OnFileChanged;
-                watcher.FileDetected -= OnFileChanged;
-                watcher.FileGone -= OnFileChanged;
+                watcher.FileDetected -= OnFileDetected;
+                watcher.FileGone -= OnFileGone;
                 watcher.Dispose();
             }
             
-            _fileWatchers.Clear();
             _disposed = true;
         }
     }

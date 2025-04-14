@@ -14,7 +14,7 @@ namespace TextSearchLib.Core.Watchers
         public event EventHandler<string> FileDetected;
         public event EventHandler<string> FileChanged;
         public event EventHandler<string> FileGone;
-
+        
         public RecursiveDirectoryWatcher(string absoluteDirectoryPath)
         {
             if (string.IsNullOrEmpty(absoluteDirectoryPath))

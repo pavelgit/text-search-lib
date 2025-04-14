@@ -8,7 +8,7 @@ namespace TextSearchLib.Core.Watchers
         private readonly FileSystemWatcher _watcher;
         private bool _disposed;
         public event EventHandler<string> FileChanged;
-        
+            
         public SingleFileWatcher(string absoluteFilePath)
         {
             if (string.IsNullOrEmpty(absoluteFilePath))

@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
+using TextSearchLib.Core.Watchers;
 
 namespace TextSearchLib.Core
 {
-    public class TextFinder
+    public class TextFinder : IDisposable
     {
         private readonly FileIndexer _fileIndexer;
         private readonly CombinedFileSystemWatcher _fileSystemWatcher;
+        private bool _disposed;
         
         public TextFinder(Func<string, IEnumerable<string>> wordSplitter = null, ILogger<TextFinder> logger = null)
         {
@@ -39,7 +41,6 @@ namespace TextSearchLib.Core
                 logger?.LogDebug("File gone: {FilePath}", changedFileAbsolutePath);
                _fileIndexer.RemoveFileFromIndex(changedFileAbsolutePath);
             };
-
         }
 
         public void AddFile(string filePath)
@@ -59,6 +60,17 @@ namespace TextSearchLib.Core
         {
             return _fileIndexer.FindFilesContainingWord(word);
         }
-    }
 
+        public void Dispose() 
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _fileSystemWatcher.Dispose();
+            
+            _disposed = true;
+        }
+    }
 }

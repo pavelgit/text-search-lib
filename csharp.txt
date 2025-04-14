@@ -91,12 +91,14 @@ GENERAL
 +	if indexed directory is changed or moved anywhere - indexing continues to work
 
 +	I will simplify the directory renaming and file renaming a lot
-	SingleFileWatcher doesn't catch file renames or deletions - I might simply reuse the DirectoryWatcher for that with proper filtering 
-	File contents are read into memory with ReadAll
-	there are still placees where method args are not null-checked
-	File change event Debouncing would be good to add (would help also against the case of file rename within a watched dir - it fires 2 events: changed and detected)
++	SingleFileWatcher doesn't catch file renames or deletions - I might simply reuse the DirectoryWatcher for that with proper filtering 
++	File contents are read into memory with ReadAll
++	there are still placees where method args are not null-checked
+???	File change event Debouncing would be good to add (would help also against the case of file rename within a watched dir - it fires 2 events: changed and detected)
 
 	what is finalize vs dispose? supress finelize??
+
+!!!	hashset might not be thread safe
 
 	FileIndexer - enter write and read locks - a bit too large locks, maybe I want to somehow make it different
 
