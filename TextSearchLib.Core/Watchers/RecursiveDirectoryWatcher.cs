@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace TextSearchLib.Core.Watchers
 {
+    /// <summary>
+    /// Monitors a directory and all its subdirectories for file changes, creations, and deletions.
+    /// </summary>
     public class RecursiveDirectoryWatcher : IDisposable
     {
         private readonly FileSystemWatcher _watcher;
@@ -12,10 +15,25 @@ namespace TextSearchLib.Core.Watchers
         
         private bool _disposed;
 
-        public event EventHandler<string> FileDetected;
+        /// <summary>
+        /// Occurs when a file in the monitored directory is changed.
+        /// </summary>
         public event EventHandler<string> FileChanged;
+        
+        /// <summary>
+        /// Occurs when a new file is detected in the monitored directory.
+        /// </summary>
+        public event EventHandler<string> FileDetected;
+        
+        /// <summary>
+        /// Occurs when a file in the monitored directory is deleted or moved.
+        /// </summary>
         public event EventHandler<string> FileGone;
         
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecursiveDirectoryWatcher"/> class.
+        /// </summary>
+        /// <param name="absoluteDirectoryPath">The absolute path of the directory to monitor.</param>
         public RecursiveDirectoryWatcher(string absoluteDirectoryPath)
         {
             if (string.IsNullOrEmpty(absoluteDirectoryPath))
@@ -65,6 +83,10 @@ namespace TextSearchLib.Core.Watchers
             }
         }
 
+        /// <summary>
+        /// Processes the initial directory detection to find existing files.
+        /// </summary>
+        /// <param name="directoryPath">The path of the directory to process.</param>
         public void ProcessDirectoryDetection(string directoryPath)
         {
             foreach (var filePath in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
@@ -81,6 +103,9 @@ namespace TextSearchLib.Core.Watchers
             }
         }
 
+        /// <summary>
+        /// Handles file change events.
+        /// </summary>
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
             if (File.Exists(e.FullPath))
@@ -89,6 +114,9 @@ namespace TextSearchLib.Core.Watchers
             }
         }
 
+        /// <summary>
+        /// Handles file creation events.
+        /// </summary>
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
             if (Directory.Exists(e.FullPath))
@@ -101,6 +129,9 @@ namespace TextSearchLib.Core.Watchers
             }
         }
 
+        /// <summary>
+        /// Handles file deletion events.
+        /// </summary>
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
             var filePathWasInDetectedPaths = ProcessSingleFileDeletion(e.FullPath);
@@ -133,6 +164,9 @@ namespace TextSearchLib.Core.Watchers
             }
         }
 
+        /// <summary>
+        /// Handles file rename events.
+        /// </summary>
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
             if (Directory.Exists(e.FullPath))
@@ -147,6 +181,9 @@ namespace TextSearchLib.Core.Watchers
             }
         }
 
+        /// <summary>
+        /// Releases all resources used by the <see cref="RecursiveDirectoryWatcher"/>.
+        /// </summary>
         public void Dispose()
         {
             if (_disposed)

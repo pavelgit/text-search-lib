@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
 namespace TextSearchLib.Core
 {
+    /// <summary>
+    /// Maintains an index of words and their associated files for efficient text search operations.
+    /// </summary>
     public class FileIndexer
     {
         private readonly ConcurrentDictionary<string, HashSet<string>> _index 
@@ -16,12 +20,23 @@ namespace TextSearchLib.Core
         
         private readonly bool _ignoreCase;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileIndexer"/> class.
+        /// </summary>
+        /// <param name="wordSplitter">Function to split text into words.</param>
+        /// <param name="ignoreCase">Whether to perform case-insensitive search. Default is true.</param>
+        /// <exception cref="ArgumentNullException">Thrown when wordSplitter is null.</exception>
         public FileIndexer(Func<string, IEnumerable<string>> wordSplitter, bool ignoreCase = true)
         {
             _wordSplitter = wordSplitter ?? throw new ArgumentNullException(nameof(wordSplitter));
             _ignoreCase = ignoreCase;
         }
 
+        /// <summary>
+        /// Adds text content to the index, associating it with a specific file.
+        /// </summary>
+        /// <param name="text">The text content to index.</param>
+        /// <param name="relatedFilePath">The path of the file containing the text.</param>
         public void AddTextToIndex(string text, string relatedFilePath)
         {
             var words = _wordSplitter(text).Distinct();
@@ -49,6 +64,10 @@ namespace TextSearchLib.Core
             }
         }
         
+        /// <summary>
+        /// Removes a file from the index.
+        /// </summary>
+        /// <param name="absoluteFilePath">The absolute path of the file to remove.</param>
         public void RemoveFileFromIndex(string absoluteFilePath)
         {
             _lock.EnterWriteLock();
@@ -67,6 +86,9 @@ namespace TextSearchLib.Core
             }
         }
 
+        /// <summary>
+        /// Removes words from the index that no longer have any associated files.
+        /// </summary>
         private void CleanupWordsWithNoFiles()
         {
             var emptyWords = 
@@ -80,6 +102,11 @@ namespace TextSearchLib.Core
             }
         }
 
+        /// <summary>
+        /// Searches for files containing the specified word.
+        /// </summary>
+        /// <param name="word">The word to search for.</param>
+        /// <returns>An enumerable of file paths containing the specified word.</returns>
         public IEnumerable<string> FindFilesContainingWord(string word)
         {
             if (_ignoreCase)
@@ -100,6 +127,5 @@ namespace TextSearchLib.Core
                 _lock.ExitReadLock();
             }
         }
-        
     }
 }
