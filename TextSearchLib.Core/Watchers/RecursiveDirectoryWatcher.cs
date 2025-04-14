@@ -18,10 +18,15 @@ namespace TextSearchLib.Core.Watchers
         public RecursiveDirectoryWatcher(string absoluteDirectoryPath)
         {
             if (string.IsNullOrEmpty(absoluteDirectoryPath))
+            {
                 throw new ArgumentNullException(nameof(absoluteDirectoryPath));
+            }
+
             if (!Directory.Exists(absoluteDirectoryPath))
+            {
                 throw new DirectoryNotFoundException($"Directory not found: {absoluteDirectoryPath}");
-            
+            }
+
             _watcher = new FileSystemWatcher(absoluteDirectoryPath)
             {
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite,
@@ -46,21 +51,29 @@ namespace TextSearchLib.Core.Watchers
         private void ProcessSingleFileDetection(string absoluteFilePath)
         {
             if (_detectedFiles.Add(absoluteFilePath))
+            {
                 FileDetected?.Invoke(this, absoluteFilePath);
+            }
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
             if (File.Exists(e.FullPath))
+            {
                 FileChanged?.Invoke(this, e.FullPath);
+            }
         }
 
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
-            if (Directory.Exists(e.FullPath)) 
+            if (Directory.Exists(e.FullPath))
+            {
                 ProcessDirectoryDetection(e.FullPath);
+            }
             else if (File.Exists(e.FullPath))
+            {
                 ProcessSingleFileDetection(e.FullPath);
+            }
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
@@ -109,7 +122,9 @@ namespace TextSearchLib.Core.Watchers
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
 
             _watcher.Changed -= OnChanged;
             _watcher.Created -= OnCreated;

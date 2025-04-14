@@ -12,11 +12,15 @@ namespace TextSearchLib.Core.Watchers
         public SingleFileWatcher(string absoluteFilePath)
         {
             if (string.IsNullOrEmpty(absoluteFilePath))
+            {
                 throw new ArgumentNullException(nameof(absoluteFilePath));
+            }
 
             if (!File.Exists(absoluteFilePath))
+            {
                 throw new DirectoryNotFoundException($"Directory not found: {absoluteFilePath}");
-            
+            }
+
             _watcher = new FileSystemWatcher(Path.GetDirectoryName(absoluteFilePath))
             {
                 NotifyFilter = NotifyFilters.LastWrite,
@@ -35,8 +39,10 @@ namespace TextSearchLib.Core.Watchers
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
-                
+            }
+
             _watcher.Changed -= OnFileChanged;
             _watcher.Dispose();
             _disposed = true;

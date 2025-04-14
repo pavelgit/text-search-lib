@@ -18,8 +18,10 @@ namespace TextSearchLib.Core
         public void AddFile(string absoluteFilePath)
         {
             if (_fileWatchers.ContainsKey(absoluteFilePath))
+            {
                 return;
-                
+            }
+
             var watcher = new SingleFileWatcher(absoluteFilePath);
             watcher.FileChanged += OnFileChanged;
             _fileWatchers.Add(absoluteFilePath, watcher);
@@ -28,7 +30,9 @@ namespace TextSearchLib.Core
         public void AddDirectory(string absoluteDirectoryPath)
         {
             if (_directoryWatchers.ContainsKey(absoluteDirectoryPath))
+            {
                 return;
+            }
 
             var watcher = new RecursiveDirectoryWatcher(absoluteDirectoryPath);
             watcher.FileChanged += OnFileChanged;
@@ -57,8 +61,10 @@ namespace TextSearchLib.Core
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
-                
+            }
+
             foreach (var watcher in _fileWatchers.Values)
             {
                 watcher.FileChanged -= OnFileChanged;
