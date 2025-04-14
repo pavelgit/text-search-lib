@@ -11,4 +11,9 @@
     <ProjectReference Include="..\TextSearchLib.Core\TextSearchLib.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.4" />
+  </ItemGroup>
+
 </Project>

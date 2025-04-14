@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using TextSearchLib.Core;
+using Microsoft.Extensions.Logging;
 
 namespace TextSearchLib.DemoCli;
 
@@ -7,17 +8,37 @@ class Program
 {
     static void Main(string[] args)
     {
+        var verbose = args.Contains("-v");
+        ILogger<TextFinder>? logger = null;
+
+        if (verbose)
+        {
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .SetMinimumLevel(LogLevel.Debug)
+                    .AddConsole();
+            });
+            logger = loggerFactory.CreateLogger<TextFinder>();
+        }
+
         Console.WriteLine("🔍 Welcome to TextSearch Console");
+        if (verbose)
+        {
+            Console.WriteLine("Verbose mode enabled - Debug logging active");
+        }
         Console.WriteLine("Type 'help' for commands.");
 
-        var textFinder = new TextFinder(text => Regex.Split(text, @"\W+"));
+        var textFinder = new TextFinder(text => Regex.Split(text, @"\W+"), logger);
 
         while (true)
         {
             Console.Write("\n> ");
             var input = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(input)) 
+            if (string.IsNullOrWhiteSpace(input))
+            {
                 continue;
+            }
 
             var parts = input.Split(' ', 2);
             var command = parts[0].ToLowerInvariant();
@@ -96,8 +117,11 @@ class Program
 Available commands:
   addfile <path>      Add a single text file to the index.
   adddir <path>       Add all text files from directory (recursively).
-  find <word>       Search for files containing a word.
+  find <word>         Search for files containing a word.
   help                Show this help message.
-  exit                Exit the program.");
+  exit                Exit the program.
+
+Usage:
+  [-v]    Run with verbose logging enabled");
     }
 }

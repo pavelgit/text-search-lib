@@ -88,9 +88,9 @@ GENERAL
 				so essentially if it is renamed - then it is removed from the index and added as a different file - can be optimized to save mem/cpu!
 				same if a file is moved within the indexed directory
 
-	if indexed directory is changed or moved anywhere - indexing continues to work
++	if indexed directory is changed or moved anywhere - indexing continues to work
 
-	I will simplify the directory renaming and file renaming a lot
++	I will simplify the directory renaming and file renaming a lot
 	SingleFileWatcher doesn't catch file renames or deletions - I might simply reuse the DirectoryWatcher for that with proper filtering 
 	File contents are read into memory with ReadAll
 	there are still placees where method args are not null-checked
@@ -98,11 +98,7 @@ GENERAL
 
 	what is finalize vs dispose? supress finelize??
 
-!!!	create different ways of splitting (lexer)
-
 	FileIndexer - enter write and read locks - a bit too large locks, maybe I want to somehow make it different
-
----	create simple app repo 
 
 	readme
 
@@ -117,14 +113,14 @@ GENERAL
 
 	publish on nuget
 
-!!!	compatibility!!!
-		different .net platforms 
++	compatibility!!!
+	+	different .net platforms 
 			https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0 
 			+ net48 (latest .net framework, 2022)
 
-		different architectures
-		different OS
-		different file systems
+	+	different architectures
+	+	different OS
+	+	different file systems
 
 	look like I need cicd??
 
@@ -135,7 +131,7 @@ GENERAL
 	+	Automatically update the index when files or directories change.
 	+	Be designed to support different ways of splitting text into words (e.g., simple text splitting or using lexers).
 		OPTIONAL: Saving its state between the sessions is an optional requirement
-	!!!	Also, create a simple program that lets users add directories or files to the index and perform basic word search queries.
+	+	Also, create a simple program that lets users add directories or files to the index and perform basic word search queries.
 
 
 		Your work will be evaluated on 
@@ -148,12 +144,6 @@ GENERAL
 
 
 -------------------------------------------------------------
-
-Questions:
-	How large may be text files?
-	How fast should be the search?
-	Do you want to see unit tests? Integration tests ()
-
 
 
 My assumptions:

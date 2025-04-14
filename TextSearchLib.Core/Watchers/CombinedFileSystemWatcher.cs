@@ -17,7 +17,6 @@ namespace TextSearchLib.Core
         
         public void AddFile(string absoluteFilePath)
         {
-            // Don't add duplicate watchers
             if (_fileWatchers.ContainsKey(absoluteFilePath))
                 return;
                 
