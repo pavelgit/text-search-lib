@@ -9,7 +9,7 @@ namespace TextSearchLib.Core
     /// <summary>
     /// Maintains an index of words and their associated files for efficient text search operations.
     /// </summary>
-    internal class FileIndexer
+    public class FileIndexer
     {
         private readonly ConcurrentDictionary<string, HashSet<string>> _index 
             = new ConcurrentDictionary<string, HashSet<string>>();
