@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -10,7 +9,7 @@ namespace TextSearchLib.Core
     /// <summary>
     /// Maintains an index of words and their associated files for efficient text search operations.
     /// </summary>
-    public class FileIndexer
+    internal class FileIndexer
     {
         private readonly ConcurrentDictionary<string, HashSet<string>> _index 
             = new ConcurrentDictionary<string, HashSet<string>>();
@@ -18,18 +17,18 @@ namespace TextSearchLib.Core
         private readonly Func<string, IEnumerable<string>> _wordSplitter;
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         
-        private readonly bool _ignoreCase;
+        private readonly bool _caseSensitive;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileIndexer"/> class.
         /// </summary>
+        /// <param name="caseSensitive">Whether to perform case-insensitive search. Default is true.</param>
         /// <param name="wordSplitter">Function to split text into words.</param>
-        /// <param name="ignoreCase">Whether to perform case-insensitive search. Default is true.</param>
         /// <exception cref="ArgumentNullException">Thrown when wordSplitter is null.</exception>
-        public FileIndexer(Func<string, IEnumerable<string>> wordSplitter, bool ignoreCase = true)
+        public FileIndexer(bool caseSensitive, Func<string, IEnumerable<string>> wordSplitter)
         {
+            _caseSensitive = caseSensitive;
             _wordSplitter = wordSplitter ?? throw new ArgumentNullException(nameof(wordSplitter));
-            _ignoreCase = ignoreCase;
         }
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace TextSearchLib.Core
         public void AddTextToIndex(string text, string relatedFilePath)
         {
             var words = _wordSplitter(text).Distinct();
-            if (_ignoreCase)
+            if (!_caseSensitive)
             {
                 words = words.Select(word => word.ToLowerInvariant());
             }
@@ -109,7 +108,7 @@ namespace TextSearchLib.Core
         /// <returns>An enumerable of file paths containing the specified word.</returns>
         public IEnumerable<string> FindFilesContainingWord(string word)
         {
-            if (_ignoreCase)
+            if (!_caseSensitive)
             {
                 word = word.ToLowerInvariant();
             }

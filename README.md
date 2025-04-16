@@ -11,6 +11,7 @@ A powerful text search library for .NET that provides efficient file indexing an
 - 🔄 Automatic index updates on file changes
 - 🚀 Suitable for concurrent search operations
 - 📊 Verbose logging support for debugging
+- 🔤 Case-sensitive search support
 
 
 ### TextSearchLib.DemoCli
@@ -37,8 +38,9 @@ dotnet build
 
 #### Using the Core Library
 
+Basic usage:
 ```csharp
-// Create a TextFinder instance
+// Create a TextFinder instance with default settings
 var textFinder = new TextFinder();
 
 // Add files or directories
@@ -49,7 +51,7 @@ textFinder.AddDirectory("path/to/directory");
 var results = textFinder.FindFilesContainingWord("wordToSearch");
 ```
 
-You can specify own word splitting logic as follows:
+With custom word splitting:
 ```csharp
 var textFinder = new TextFinder(text => text.Split('|'));
 ```

@@ -15,20 +15,21 @@ namespace TextSearchLib.Core
         private readonly FileIndexer _fileIndexer;
         private readonly CombinedFileSystemWatcher _fileSystemWatcher;
         private bool _disposed;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TextFinder"/> class.
         /// </summary>
+        /// <param name="caseSensitive">Optional bool param, specifies whether the search should be case sensitive</param>
         /// <param name="wordSplitter">Optional function to split text into words. If not provided, uses default word splitting logic.</param>
         /// <param name="logger">Optional logger for verbose output.</param>
-        public TextFinder(Func<string, IEnumerable<string>> wordSplitter = null, ILogger<TextFinder> logger = null)
+        public TextFinder(bool caseSensitive = false, Func<string, IEnumerable<string>> wordSplitter = null , ILogger<TextFinder> logger = null)
         {
             if (wordSplitter == null)
             {
                 wordSplitter = text => Regex.Split(text, @"\W+");
             }
             
-            _fileIndexer = new FileIndexer(wordSplitter);
+            _fileIndexer = new FileIndexer(caseSensitive, wordSplitter);
             _fileSystemWatcher = new CombinedFileSystemWatcher();
             
             _fileSystemWatcher.FileChanged += (sender, changedFileAbsolutePath) =>
