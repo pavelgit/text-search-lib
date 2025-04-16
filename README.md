@@ -53,7 +53,58 @@ var results = textFinder.FindFilesContainingWord("wordToSearch");
 
 With custom word splitting:
 ```csharp
-var textFinder = new TextFinder(text => text.Split('|'));
+var textFinder = new TextFinder(wordSplitter: text => text.Split('|'));
+```
+
+With case-sensitive search:
+```csharp
+// Create a TextFinder with case-sensitive search
+var textFinder = new TextFinder(true);
+
+// This will only match exact case
+var results = textFinder.FindFilesContainingWord("CaseSensitive");
+// Will not match: "casesensitive" or "CASESENSITIVE"
+```
+
+With logging:
+```csharp
+// Set up logging
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder
+        .SetMinimumLevel(LogLevel.Debug)
+        .AddConsole();
+});
+
+var logger = loggerFactory.CreateLogger<TextFinder>();
+var textFinder = new TextFinder(logger: logger);
+
+// Now you'll see debug logs for file operations
+textFinder.AddFile("path/to/file.txt");
+```
+
+Combining options:
+```csharp
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder
+        .SetMinimumLevel(LogLevel.Debug)
+        .AddConsole();
+});
+
+var logger = loggerFactory.CreateLogger<TextFinder>();
+var textFinder = new TextFinder(
+    wordSplitter: text => text.Split('|'),
+    caseSensitive: true,
+    logger: logger
+);
+
+// This will use all custom settings:
+// - Custom word splitting
+// - Case-sensitive search
+// - Debug logging
+textFinder.AddFile("path/to/file.txt");
+var results = textFinder.FindFilesContainingWord("Case|Sensitive");
 ```
 
 #### Using the Demo CLI

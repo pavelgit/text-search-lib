@@ -29,7 +29,7 @@ class Program
         }
         Console.WriteLine("Type 'help' for commands.");
 
-        var textFinder = new TextFinder(text => Regex.Split(text, @"\W+"), logger);
+        var textFinder = new TextFinder(logger: logger);
 
         while (true)
         {
